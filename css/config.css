@@ -1,0 +1,45 @@
+.settings-heading {
+  padding: 1em 0;
+}
+
+.kintoneplugin-input-text {
+  width: 20em;
+}
+
+.modal-refuse {
+	border: 0px;
+	box-shadow: none;
+}
+
+.co-page-orderlist {
+  height: 500px;
+  max-height: 500px;
+  overflow: auto;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.pick-label {
+  border: 1px solid #dddddd;
+  text-align: center;
+  padding: 8px;
+}
+
+.pick-label:hover {
+	background-color: #f4f7f8;
+	cursor: pointer;
+}

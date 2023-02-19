@@ -1,0 +1,129 @@
+<link href="../css/51-modern-default.css" rel="stylesheet">
+<link href="../css/config.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://js.cybozu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<section class="settings">
+  <p class="kintoneplugin-desc">This plugin will integrate 302 app style</p>
+
+  <form class="js-submit-settings">
+    <p class="kintoneplugin-row">
+      <label class="kintoneplugin-label">
+        Target Lookup(Data Source):
+      </label>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <div class="kintoneplugin-select-outer">
+        <div class="kintoneplugin-select">
+          <select id="select_fields" name="select_fields">
+            <option value="">-----</option>
+          </select>
+        </div>
+      </div>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <label class="kintoneplugin-label">
+        Setting Checkbox:
+      </label>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <label for="message">
+        ID Prefix Monday:
+        <input id="mon" type="text" class="js-text-message kintoneplugin-input-text">
+      </label>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <label for="message">
+        ID Prefix Tuesday:
+        <input id="tue" type="text" class="js-text-message kintoneplugin-input-text">
+      </label>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <label for="message">
+        ID Prefix Wendsday:
+        <input id="wed" type="text" class="js-text-message kintoneplugin-input-text">
+      </label>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <label for="message">
+        ID Prefix Thirthday:
+        <input id="thr" type="text" class="js-text-message kintoneplugin-input-text">
+      </label>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <label for="message">
+        ID Prefix Friday:
+        <input id="fri" type="text" class="js-text-message kintoneplugin-input-text">
+      </label>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <label for="message">
+        ID Prefix Satday:
+        <input id="sat" type="text" class="js-text-message kintoneplugin-input-text">
+      </label>
+    </p>
+
+
+    <p class="kintoneplugin-row">
+      <label for="message">
+        ID Prefix Sanday:
+        <input id="san" type="text" class="js-text-message kintoneplugin-input-text">
+      </label>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <p class="kintoneplugin-row">
+        <label class="kintoneplugin-label">
+          Setting Monday:
+        </label>
+      </p>
+    </p>
+
+    <p class="kintoneplugin-row">
+      <input type="date" id="mondate" name="mondate">
+    </p>
+
+    <div class="kintoneplugin-row">
+      <label id="mon_pick" class="kintoneplugin-label pick-label">
+        Monday Absent
+      </label>
+      <p id ="mon_desc" class="kintoneplugin-desc">Cha, Myung Sun : Chu, Hai-Ping : Chu, Ming Fa : Chun, Byong Hui</p>
+    </div>
+
+    <div id="demo-modal" class="modal">
+      <div class="modal__content">
+        <h1>Select</h1>
+
+        <table id = "records">
+          <tr>
+            <th>No</th>
+            <th>Field</th>
+            <th>Absent</th>
+          </tr>
+        </table>
+
+        <div class="modal__footer">
+          <button type="button" class="js-cancel-button kintoneplugin-button-dialog-cancel">Cancel</button>
+          <button class="kintoneplugin-button-dialog-ok">Ok</button>
+        </div>
+
+        <a href="#" class="modal__close">&times;</a>
+      </div>
+    </div>
+
+    <p class="kintoneplugin-row">
+      <button type="button" class="js-cancel-button kintoneplugin-button-dialog-cancel">Cancel</button>
+      <button class="kintoneplugin-button-dialog-ok">Save</button>
+    </p>
+  </form>
+</section>

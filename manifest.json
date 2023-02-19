@@ -1,0 +1,38 @@
+{
+  "manifest_version": 1,
+  "version": 1,
+  "type": "APP",
+  "desktop": {
+    "js": [
+      "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "js/desktop.js"
+    ],
+    "css": [
+      "css/51-modern-default.css",
+      "css/desktop.css"
+    ]
+  },
+  "icon": "image/icon.png",
+  "config": {
+    "html": "html/config.html",
+    "js": [
+      "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js",
+      "js/config.js"
+    ],
+    "css": [
+      "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+      "css/51-modern-default.css",
+      "css/config.css"
+    ],
+    "required_params": [
+      "message"
+    ]
+  },
+  "name": {
+    "en": "302 Bulk"
+  },
+  "description": {
+    "en": "Automatically generate 302 data from some app"
+  }
+}
