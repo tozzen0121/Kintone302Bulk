@@ -117,6 +117,35 @@ jQuery.noConflict();
     });
   }
 
+  const getAllRecords = () => {
+    fetch_fast().then(function (records) {
+      allRecords = records
+    });
+  }
+
+  const fetch_fast = (opt_last_record_id, opt_records) => {
+    var records = opt_records || [];
+    var query = opt_last_record_id ? '$id > ' + opt_last_record_id : '';
+    query += ' order by $id asc limit 500';
+    var params = {
+      app: configVal.app_id,
+      query: query,
+      fields: ['$id', 'Contact_Name']
+    };
+    return kintone.api('/k/v1/records', 'GET', params).then(function (resp) {
+      records = records.concat(resp.records);
+      if (resp.records.length === 500) {
+        /* If the maximum number of retrievable records was retrieved, there is a possibility that more records exist.
+          Therefore, the next 500 records that have a record number larger than the last retrieved record are retrieved.
+          Since the records are retrieved all at once in ascending record number order,
+          it is possible to retrieve the next 500 records with these conditions.
+        */
+        return fetch_fast(resp.records[resp.records.length - 1].$id.value, records);
+      }
+      return records;
+    });
+  }
+
   // Record List Event
   kintone.events.on('app.record.index.show', function (event) {
     const records = event.records;
@@ -127,8 +156,6 @@ jQuery.noConflict();
     // Create button
     var str = config.val;
     if (typeof str !== 'undefined' && str != '') {
-      const appId = configVal.app_id
-
       // Create button
       var btn = document.createElement('button');
       btn.appendChild(document.createTextNode(' Generate 302 '));
@@ -139,11 +166,7 @@ jQuery.noConflict();
           return
         }
 
-        var fields = '&fields[0]=Contact_Name';
-
-        kintone.api(kintone.api.url('/k/v1/records', true) + '?app=' + appId + fields, 'GET', {}, function (resp) {
-          // success
-          const records = resp.records
+        fetch_fast().then(function (records) {
           console.log('total record count =>', records.length)
           for (var i = 0; i < records.length; i++) {
             const element = records[i]
@@ -153,10 +176,26 @@ jQuery.noConflict();
             }
           }
           alert("Done, Please refresh page and then check them.")
-        }, function (error) {
-          // error
-          console.log(error);
         });
+
+        // var fields = '&fields[0]=Contact_Name';
+
+        // kintone.api(kintone.api.url('/k/v1/records', true) + '?app=' + appId + fields, 'GET', {}, function (resp) {
+        //   // success
+        //   const records = resp.records
+        //   console.log('total record count =>', records.length)
+        //   for (var i = 0; i < records.length; i++) {
+        //     const element = records[i]
+        //     const name = element.Contact_Name.value
+        //     if (name != '') {
+        //       addRecord(name)
+        //     }
+        //   }
+        //   alert("Done, Please refresh page and then check them.")
+        // }, function (error) {
+        //   // error
+        //   console.log(error);
+        // });
       }
     }
   });
