@@ -34,3 +34,7 @@ val : {
     {6:[]}
   ]
 }
+
+## problem
+1. Check lookup field
+https://kintone.dev/en/docs/kintone/rest-api/overview/kintone-rest-api-overview/

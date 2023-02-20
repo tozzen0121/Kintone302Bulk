@@ -9,6 +9,7 @@ jQuery.noConflict();
   var fieldInfos = []
   var lookupInfo = null
   var appId = -1
+  var allRecords = []
 
 
   const escapeHtml = (htmlstr) => {
@@ -80,9 +81,39 @@ jQuery.noConflict();
     });
   };
 
+  const getAllRecords = () => {
+    fetch_fast().then(function (records) {
+      allRecords = records
+    });
+  }
+
+  const fetch_fast = (opt_last_record_id, opt_records) => {
+    var records = opt_records || [];
+    var query = opt_last_record_id ? '$id > ' + opt_last_record_id : '';
+    query += ' order by $id asc limit 500';
+    var params = {
+      app: appId,
+      query: query,
+      fields: ['$id', 'Contact_Name']
+    };
+    return kintone.api('/k/v1/records', 'GET', params).then(function (resp) {
+      records = records.concat(resp.records);
+      if (resp.records.length === 500) {
+        /* If the maximum number of retrievable records was retrieved, there is a possibility that more records exist.
+          Therefore, the next 500 records that have a record number larger than the last retrieved record are retrieved.
+          Since the records are retrieved all at once in ascending record number order,
+          it is possible to retrieve the next 500 records with these conditions.
+        */
+        return fetch_fast(resp.records[resp.records.length - 1].$id.value, records);
+      }
+      return records;
+    });
+  }
+
   $(document).ready(() => {
     loadConfig()
     setDropdown()
+    getAllRecords()
 
     $('#mon_pick').click(() => {
       pick(0)
@@ -121,6 +152,7 @@ jQuery.noConflict();
 
       if (typeof lookupInfo != undefined) {
         appId = lookupInfo.lookup.relatedApp.app
+        getAllRecords()
       }
     });
 
@@ -128,23 +160,14 @@ jQuery.noConflict();
       activeDay = index
       const selected = selectedMems[activeDay]
 
-      var fields = '&fields[0]=Contact_Name';
+      $('#tbody').empty()
 
-      kintone.api(kintone.api.url('/k/v1/records', true) + '?app=' + appId + fields, 'GET', {}, function (resp) {
-        // success
-        console.log(resp);
-        $('#tbody').empty()
-        resp.records.forEach((element, i) => {
-          const name = element.Contact_Name.value
-          const checked = (selected == 'undefined' || selected == null) ? false : selected.includes(name)
-          $('#tbody').append('<tr><td>' + (i + 1) + '</td>'
-            + '<td>' + name + '</td>'
-            + '<td><input type="checkbox" value = "' + name + '"' + (checked ? ' checked' : '') + '></td></tr>');
-        });
-
-      }, function (error) {
-        // error
-        console.log(error);
+      allRecords.forEach((element, i) => {
+        const name = element.Contact_Name.value
+        const checked = (selected == 'undefined' || selected == null) ? false : selected.includes(name)
+        $('#tbody').append('<tr><td>' + (i + 1) + '</td>'
+          + '<td>' + name + '</td>'
+          + '<td><input type="checkbox" value = "' + name + '"' + (checked ? ' checked' : '') + '></td></tr>');
       });
 
       $("#selectModal").modal("toggle");
@@ -159,7 +182,7 @@ jQuery.noConflict();
 
       selectedMems[activeDay] = selected
       const count = selected.length
-      var desc = countselected.join(' : ')
+      var desc = selected.join(' : ')
 
       if (activeDay == 0) {
         $('#mon_desc').text(desc)
