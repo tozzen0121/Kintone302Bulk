@@ -7,8 +7,8 @@
 }
 
 .modal-refuse {
-	border: 0px;
-	box-shadow: none;
+  border: 0px;
+  box-shadow: none;
 }
 
 .co-page-orderlist {
@@ -23,7 +23,8 @@ table {
   width: 100%;
 }
 
-td, th {
+td,
+th {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
@@ -37,9 +38,23 @@ tr:nth-child(even) {
   border: 1px solid #dddddd;
   text-align: center;
   padding: 8px;
+  width: 150px;
+  color: #3cabf2;
 }
 
 .pick-label:hover {
-	background-color: #f4f7f8;
-	cursor: pointer;
+  background-color: #3cabf2;
+  cursor: pointer;
+  color: white
+}
+
+
+.kintone-row>* {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.kintone-input {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
