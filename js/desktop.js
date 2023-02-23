@@ -7,6 +7,7 @@ jQuery.noConflict();
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
   var configVal = {}
   var checkFields = []
+  var allRecords = []
 
   if (config) {
     var str = config.val;
@@ -29,6 +30,8 @@ jQuery.noConflict();
       });
       console.log('checkboxs', checkFields)
     });
+
+    getAllRecords()
   }
 
 
@@ -75,8 +78,8 @@ jQuery.noConflict();
     return query
   }
 
-  const addRecords = ()=> {
-    
+  const addRecords = () => {
+
   }
 
   const addRecord = (name) => {
@@ -121,14 +124,21 @@ jQuery.noConflict();
     });
   }
 
-  const fetch_fast = (opt_last_record_id, opt_records) => {
+  function getAllRecords() {
+    fetch_fast().then(function (records) {
+      allRecords = records
+    });
+  }
+
+  function fetch_fast(opt_last_record_id, opt_records) {
     var records = opt_records || [];
     var query = opt_last_record_id ? '$id > ' + opt_last_record_id : '';
+    query += (query != '' ? ' and' : '') + ' active_daycare_member = "Daycare Member"'
     query += ' order by $id asc limit 500';
     var params = {
       app: configVal.app_id,
       query: query,
-      fields: ['$id', 'Contact_Name']
+      fields: ['$id', 'Contact_Name', 'active_daycare_member']
     };
     return kintone.api('/k/v1/records', 'GET', params).then(function (resp) {
       records = records.concat(resp.records);
@@ -163,6 +173,34 @@ jQuery.noConflict();
       se.appendChild(btn);
 
       btn.onclick = async () => {
+        var table = $('<table> \
+          <tr> \
+            <th>No</th> \
+            <th>Field</th> \
+            <th><input type="checkbox" id="check_all"></th> \
+          </tr> \
+        </table>')
+
+        var div = $('<div class="modal-container"></div>')
+        div.append(table)
+
+        allRecords.forEach((element, i) => {
+          const name = element.Contact_Name.value
+          const checked = false//(selected == 'undefined' || selected == null) ? false : selected.includes(name)
+          table.append('<tr><td>' + (i + 1) + '</td>'
+            + '<td>' + name + '</td>'
+            + '<td><input type="checkbox" value = "' + name + '"' + (checked ? ' checked' : '') + '></td></tr>');
+        });
+
+        Swal.fire({
+          title: '<strong>Select Item</strong>',
+          icon: 'info',
+          html: div,
+          showCancelButton: true,
+          heightAuto: false
+        })
+
+        /*
         if (!confirm("Are you sure to generate records with currently setting?")) {
           return
         }
@@ -177,26 +215,6 @@ jQuery.noConflict();
             }
           }
           alert("Done, Please refresh page and then check them.")
-        });
-
-        /*
-        var fields = '&fields[0]=Contact_Name';
-
-        kintone.api(kintone.api.url('/k/v1/records', true) + '?app=' + appId + fields, 'GET', {}, function (resp) {
-          // success
-          const records = resp.records
-          console.log('total record count =>', records.length)
-          for (var i = 0; i < records.length; i++) {
-            const element = records[i]
-            const name = element.Contact_Name.value
-            if (name != '') {
-              addRecord(name)
-            }
-          }
-          alert("Done, Please refresh page and then check them.")
-        }, function (error) {
-          // error
-          console.log(error);
         });
         */
       }

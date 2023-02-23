@@ -5,9 +5,11 @@
   "desktop": {
     "js": [
       "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "https://js.kintone.com/sweetalert2/v7.24.4/sweetalert2.min.js",
       "js/desktop.js"
     ],
     "css": [
+      "https://js.kintone.com/sweetalert2/v7.24.4/sweetalert2.min.css",
       "css/51-modern-default.css",
       "css/desktop.css"
     ]

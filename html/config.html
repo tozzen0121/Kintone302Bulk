@@ -82,11 +82,11 @@
   </div>
 
 
-  <p class="kintoneplugin-row">
+  <div class="kintoneplugin-row kintone-row">
     <label class="kintoneplugin-label">
       Setting Absents:
     </label>
-  </p>
+  </div>
 
   <div class="kintoneplugin-row kintone-row">
     <label id="mon_pick" class="kintoneplugin-title pick-label">
@@ -137,12 +137,16 @@
     <p id="sun_desc" class="kintoneplugin-desc"></p>
   </div>
 
+  <div class="kintoneplugin-row kintone-row">
+    <p class="clear-setting">Clear Absent Settings?</p>
+  </div>
 
   <div class="modal fade" id="selectModal" aria-hidden="true" aria-labelledby="selectModalLabel" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-refuse">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="selectModalLabel">Select</h1>
+          <h5 class="modal-title" id="selectModalLabel">Select Absents</h5>
+          <input type="text" id="quick_search" placeholder="Quick Search">
         </div>
         <div class="modal-body">
           <div class="co-page-orderlist">
@@ -150,7 +154,7 @@
               <tr>
                 <th>No</th>
                 <th>Field</th>
-                <th>Check</th>
+                <th></th>
               </tr>
               <tbody id="tbody">
               </tbody>
@@ -165,6 +169,10 @@
       </div>
     </div>
   </div>
+
+  <hr>
+
+  <p class="kintoneplugin-row" />
 
   <p class="kintoneplugin-row">
     <button type="button" class="js-cancel-button kintoneplugin-button-dialog-cancel">Cancel</button>

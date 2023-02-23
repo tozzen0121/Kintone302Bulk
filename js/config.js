@@ -90,12 +90,14 @@ jQuery.noConflict();
   const fetch_fast = (opt_last_record_id, opt_records) => {
     var records = opt_records || [];
     var query = opt_last_record_id ? '$id > ' + opt_last_record_id : '';
+    query += (query != '' ? ' and' : '') + ' active_daycare_member = "Daycare Member"'
     query += ' order by $id asc limit 500';
     var params = {
       app: appId,
       query: query,
-      fields: ['$id', 'Contact_Name']
+      fields: ['$id', 'Contact_Name', 'active_daycare_member']
     };
+    console.log(params)
     return kintone.api('/k/v1/records', 'GET', params).then(function (resp) {
       records = records.concat(resp.records);
       if (resp.records.length === 500) {
@@ -161,6 +163,8 @@ jQuery.noConflict();
       const selected = selectedMems[activeDay]
 
       $('#tbody').empty()
+
+      $('#quick_search').val('')
 
       allRecords.forEach((element, i) => {
         const name = element.Contact_Name.value
@@ -236,6 +240,32 @@ jQuery.noConflict();
       c.val = stringVal;
 
       kintone.plugin.app.setConfig(c);
+    })
+
+    $('#quick_search').on('input', () => {
+      var text = $('#quick_search').val().toLowerCase()
+      console.log(text)
+      $('#tbody > tr').each(function () {
+        var val = $(this).find("td:eq(1)").text()
+        val.toLowerCase().includes(text) ? $(this).show() : $(this).hide()
+      })
+    });
+
+    $('.clear-setting').click(() => {
+      if (!confirm("Are you sure to clear currently setting?")) {
+        return
+      }
+
+      var desc = ''
+      $('#mon_desc').text(desc)
+      $('#tue_desc').text(desc)
+      $('#wed_desc').text(desc)
+      $('#thr_desc').text(desc)
+      $('#fri_desc').text(desc)
+      $('#sat_desc').text(desc)
+      $('#sun_desc').text(desc)
+
+      selectedMems = []
     })
 
   });
