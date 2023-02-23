@@ -154,6 +154,7 @@ jQuery.noConflict();
     });
   }
 
+
   // Record List Event
   kintone.events.on('app.record.index.show', function (event) {
     const records = event.records;
@@ -173,7 +174,9 @@ jQuery.noConflict();
       se.appendChild(btn);
 
       btn.onclick = async () => {
-        var table = $('<table> \
+        var quickInput = $('<div style="margin-bottom:8px"><input type="text" id="quick_search" placeholder="Quick Search"></div>')
+
+        var table = $('<table id = "target"> \
           <tr> \
             <th>No</th> \
             <th>Field</th> \
@@ -181,8 +184,12 @@ jQuery.noConflict();
           </tr> \
         </table>')
 
-        var div = $('<div class="modal-container"></div>')
-        div.append(table)
+        var container = $('<div class="modal-container"></div>')
+        container.append(table)
+
+        var body = $('<div></div>')
+        body.append(quickInput)
+        body.append(container)
 
         allRecords.forEach((element, i) => {
           const name = element.Contact_Name.value
@@ -193,11 +200,31 @@ jQuery.noConflict();
         });
 
         Swal.fire({
-          title: '<strong>Select Item</strong>',
-          icon: 'info',
-          html: div,
+          title: 'Select Rows',
+          html: body,
           showCancelButton: true,
-          heightAuto: false
+          heightAuto: false,
+          padding:'0 0 1.0em',
+          didOpen: () => {
+            $('#check_all').change(function() {
+              $('#target input:checkbox').not(this).prop('checked', $(this).is(":checked"));
+            })
+
+            $('#quick_search').on('input', () => {
+              var text = $('#quick_search').val().toLowerCase()
+              console.log(text)
+              $('#target > tbody > tr').not(':first').each(function () {
+                var val = $(this).find("td:eq(1)").text()
+                val.toLowerCase().includes(text) ? $(this).show() : $(this).hide()
+              })
+            });
+
+          },
+        }).then((result) => {
+          /* Read more about isConfirmed, isDenied below */
+          if (result.isConfirmed) {
+            
+          }
         })
 
         /*
