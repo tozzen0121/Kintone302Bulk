@@ -35,6 +35,24 @@ jQuery.noConflict();
   }
 
 
+  function showIndicator() {
+    // Initialize
+    if ($('.activity-indicator').length === 0) {
+      // Create elements for the spinner and the background of the spinner
+      const spin_div = $('<div class="activity-indicator"></div>');
+
+      // Append spinner to the body
+      $(document.body).append(spin_div);
+    }
+
+    // Display the spinner
+    $('.activity-indicator').show();
+  }
+
+  function hideIndicator() {
+    $('.activity-indicator').hide();
+  }
+
   const validatePrefix = (val, def) => {
     if (val != null && val != 'undefined' && val != '') {
       return val
@@ -78,11 +96,16 @@ jQuery.noConflict();
     return query
   }
 
-  const addRecords = () => {
-
+  const addRecords = (selected) => {
+    selected.forEach((sel, i) => {
+      var index = allRecords.findIndex((record) => record.Contact_Name.value == sel)
+      if (index != -1) {
+        addRecord(sel, (i == selected.length - 1))
+      }
+    })
   }
 
-  const addRecord = (name) => {
+  const addRecord = (name, isLast) => {
     var body = {
       app: kintone.app.getId(),
       record: {
@@ -118,19 +141,43 @@ jQuery.noConflict();
     console.log('REST body', body)
 
     kintone.api(kintone.api.url('/k/v1/record', true), 'POST', body, function (resp) {
-      console.log(resp);
+      if (isLast) {
+        hideIndicator()
+        Swal.fire({
+          icon: 'success',
+          title: 'Done, Please refresh page and then check them.',
+          showConfirmButton: false,
+          timer: 3000
+        })
+      }
     }, function (error) {
       console.log(error);
     });
   }
 
-  function getAllRecords() {
-    fetch_fast().then(function (records) {
-      allRecords = records
-    });
+  function getContactQuery(contacts) {
+    var query = ''
+    for (var i = 0; i < contacts.length; i++) {
+      var contact = contacts[i]
+      if (i == 0) {
+        query += '('
+      } else {
+        query += ' or '
+      }
+      query += 'Recipient_s_Name = "' + contact + '"'
+
+      if (i == contacts.length - 1) {
+        query += ')'
+      }
+    }
+    if (query != '') {
+      query += ' and monday = "' + configVal.mon_date +'"'
+    }
+    return query
   }
 
-  function fetch_fast(opt_last_record_id, opt_records) {
+  
+  function fetchFastAll(opt_last_record_id, opt_records) {
     var records = opt_records || [];
     var query = opt_last_record_id ? '$id > ' + opt_last_record_id : '';
     query += (query != '' ? ' and' : '') + ' active_daycare_member = "Daycare Member"'
@@ -140,20 +187,48 @@ jQuery.noConflict();
       query: query,
       fields: ['$id', 'Contact_Name', 'active_daycare_member']
     };
+
     return kintone.api('/k/v1/records', 'GET', params).then(function (resp) {
       records = records.concat(resp.records);
       if (resp.records.length === 500) {
-        /* If the maximum number of retrievable records was retrieved, there is a possibility that more records exist.
-          Therefore, the next 500 records that have a record number larger than the last retrieved record are retrieved.
-          Since the records are retrieved all at once in ascending record number order,
-          it is possible to retrieve the next 500 records with these conditions.
-        */
-        return fetch_fast(resp.records[resp.records.length - 1].$id.value, records);
+        return fetchFastAll(resp.records[resp.records.length - 1].$id.value, records);
       }
       return records;
     });
   }
 
+  function getAllRecords() {
+    fetchFastAll().then(function (records) {
+      allRecords = records
+    });
+  }
+
+  function fetchFastCond(contacts, opt_last_record_id, opt_records) {
+    var records = opt_records || [];
+    var query = opt_last_record_id ? '$id > ' + opt_last_record_id : '';
+    query += (query != '' ? ' and ' : '') + getContactQuery(contacts)
+    query += ' order by $id asc limit 500';
+    var params = {
+      app: kintone.app.getId(),
+      query: query,
+      fields: ['$id', 'Recipient_s_Name',]
+    };
+    console.log(params)
+
+    return kintone.api('/k/v1/records', 'GET', params).then(function (resp) {
+      records = records.concat(resp.records);
+      if (resp.records.length === 500) {
+        return fetchFastCond(contacts, resp.records[resp.records.length - 1].$id.value, records);
+      }
+      return records;
+    });
+  }
+
+  function getCondRecords(contacts) {
+    return fetchFastCond(contacts).then(function (records) {
+      return records
+    });
+  }
 
   // Record List Event
   kintone.events.on('app.record.index.show', function (event) {
@@ -174,12 +249,10 @@ jQuery.noConflict();
       se.appendChild(btn);
 
       btn.onclick = async () => {
-        var quickInput = $('<div style="margin-bottom:8px"><input type="text" id="quick_search" placeholder="Quick Search"></div>')
-
         var table = $('<table id = "target"> \
           <tr> \
             <th>No</th> \
-            <th>Field</th> \
+            <th><input type="text" id="quick_search" placeholder="Quick Search"></th> \
             <th><input type="checkbox" id="check_all"></th> \
           </tr> \
         </table>')
@@ -188,7 +261,6 @@ jQuery.noConflict();
         container.append(table)
 
         var body = $('<div></div>')
-        body.append(quickInput)
         body.append(container)
 
         allRecords.forEach((element, i) => {
@@ -204,15 +276,14 @@ jQuery.noConflict();
           html: body,
           showCancelButton: true,
           heightAuto: false,
-          padding:'0 0 1.0em',
+          padding: '25px 0 25px',
           didOpen: () => {
-            $('#check_all').change(function() {
+            $('#check_all').change(function () {
               $('#target input:checkbox').not(this).prop('checked', $(this).is(":checked"));
             })
 
             $('#quick_search').on('input', () => {
               var text = $('#quick_search').val().toLowerCase()
-              console.log(text)
               $('#target > tbody > tr').not(':first').each(function () {
                 var val = $(this).find("td:eq(1)").text()
                 val.toLowerCase().includes(text) ? $(this).show() : $(this).hide()
@@ -223,27 +294,46 @@ jQuery.noConflict();
         }).then((result) => {
           /* Read more about isConfirmed, isDenied below */
           if (result.isConfirmed) {
-            
+            showIndicator();
+
+            var selected = [];
+            $('#target tr input:checked').each(function () {
+              selected.push($(this).val());
+            });
+
+            if (selected.length > 0) {
+              getCondRecords(selected).then(function (records) {
+                var exist = []
+                records.forEach((element, i) => {
+                  const name = element.Recipient_s_Name.value
+                  exist.push(name)
+                });
+                console.log(exist)
+
+                if (exist.length > 0) {
+                  selected = selected.filter(e => !exist.includes(e)); // will return ['A', 'C']
+                  console.log(selected)
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Duplicate',
+                    text: 'There are duplicated record(s) in same Monday. They will not generated',
+                  }).then(() => {
+                    if (selected == 0) {
+                      hideIndicator()
+                      return
+                    }
+
+                    addRecords(selected)
+                  })
+                } else {
+                  addRecords(selected)
+                }
+
+              });
+            }
           }
         })
 
-        /*
-        if (!confirm("Are you sure to generate records with currently setting?")) {
-          return
-        }
-
-        fetch_fast().then(function (records) {
-          console.log('total record count =>', records.length)
-          for (var i = 0; i < records.length; i++) {
-            const element = records[i]
-            const name = element.Contact_Name.value
-            if (name != '') {
-              addRecord(name)
-            }
-          }
-          alert("Done, Please refresh page and then check them.")
-        });
-        */
       }
     }
   });
