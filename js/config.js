@@ -216,10 +216,12 @@ jQuery.noConflict();
 
       const date = $('#mon_date').val()
       const monDate = new Date(date)
+      /*
       if (!(monDate instanceof Date) || isNaN(monDate)) {
         alert('Please select Monday')
         return
       }
+      */
 
       val.app_id = appId
       val.lookup_code = lookupInfo.code

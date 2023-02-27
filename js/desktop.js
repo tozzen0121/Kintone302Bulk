@@ -8,11 +8,15 @@ jQuery.noConflict();
   var configVal = {}
   var checkFields = []
   var allRecords = []
+  var absentMembers = []
+
+  const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
   if (config) {
     var str = config.val;
     if (typeof str !== 'undefined' && str != '') {
       configVal = JSON.parse(str);
+      absentMembers = configVal.absent
     }
     console.log('config', configVal)
 
@@ -32,6 +36,19 @@ jQuery.noConflict();
     });
 
     getAllRecords()
+  }
+
+  function saveConfig() {
+    console.log("preare saving configure")
+
+    var stringVal = JSON.stringify(configVal);
+    const c = {};
+    c.val = stringVal;
+
+    // seems not working....
+    kintone.plugin.app.setConfig(c, ()=> {
+      console.log("saved configure")
+    });
   }
 
 
@@ -149,6 +166,8 @@ jQuery.noConflict();
           showConfirmButton: false,
           timer: 3000
         })
+
+        saveConfig()
       }
     }, function (error) {
       console.log(error);
@@ -171,12 +190,12 @@ jQuery.noConflict();
       }
     }
     if (query != '') {
-      query += ' and monday = "' + configVal.mon_date +'"'
+      query += ' and monday = "' + configVal.mon_date + '"'
     }
     return query
   }
 
-  
+
   function fetchFastAll(opt_last_record_id, opt_records) {
     var records = opt_records || [];
     var query = opt_last_record_id ? '$id > ' + opt_last_record_id : '';
@@ -230,6 +249,67 @@ jQuery.noConflict();
     });
   }
 
+  const pickAbsentModal = (index) => {
+    const absents = absentMembers[index]
+    console.log("picked", absentMembers)
+
+    var table = $('<table id = "pick"> \
+    <tr> \
+      <th>No</th> \
+      <th><input type="text" id="quick_search" placeholder="Quick Search"></th> \
+      <th><input type="checkbox" id="check_all"></th> \
+    </tr> \
+  </table>')
+
+    var container = $('<div class="modal-container"></div>')
+    container.append(table)
+
+    var body = $('<div></div>')
+    body.append(container)
+
+    allRecords.forEach((element, i) => {
+      const name = element.Contact_Name.value
+      const checked = (absents == 'undefined' || absents == null) ? false : absents.includes(name)
+      table.append('<tr><td>' + (i + 1) + '</td>'
+        + '<td>' + name + '</td>'
+        + '<td><input type="checkbox" value = "' + name + '"' + (checked ? ' checked' : '') + '></td></tr>');
+    });
+
+    Swal.fire({
+      title: WEEK[index] + ' Absent',
+      html: body,
+      showCancelButton: true,
+      heightAuto: false,
+      padding: '25px 0 25px',
+      didOpen: () => {
+        $('#check_all').change(function () {
+          $('#pick input:checkbox').not(this).prop('checked', $(this).is(":checked"));
+        })
+
+        $('#quick_search').on('input', () => {
+          var text = $('#quick_search').val().toLowerCase()
+          $('#pick > tbody > tr').not(':first').each(function () {
+            var val = $(this).find("td:eq(1)").text()
+            val.toLowerCase().includes(text) ? $(this).show() : $(this).hide()
+          })
+        });
+      },
+    }).then((result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        var selected = [];
+        $('#pick tr input:checked').each(function () {
+          selected.push($(this).val());
+        });
+
+        if (selected.length > 0) {
+          absentMembers[index] = selected
+        }
+      }
+    })
+
+  }
+
   // Record List Event
   kintone.events.on('app.record.index.show', function (event) {
     const records = event.records;
@@ -237,18 +317,64 @@ jQuery.noConflict();
     // Get the element of the Blank space field
     var se = kintone.app.getHeaderMenuSpaceElement();
 
-    // Create button
+    // Create plugin elements
     var str = config.val;
     if (typeof str !== 'undefined' && str != '') {
+      // create pick date
+      var dateMon = document.createElement("input");
+      dateMon.type = "date";
+      dateMon.name = "mon_date";
+      dateMon.id = "mon_date";
+      dateMon.style.marginRight = '10px'
+      dateMon.value = configVal.mon_date
+      dateMon.addEventListener('input', function (evt) {
+        configVal.mon_date = evt.target.value
+    });
+
+      // Create absents buttons
+      var btnMon = document.createElement('button');
+      btnMon.appendChild(document.createTextNode('Mo'))
+      btnMon.onclick = () => pickAbsentModal(0)
+
+      var btnTue = document.createElement('button');
+      btnTue.appendChild(document.createTextNode('Tu'))
+      btnTue.onclick = () => pickAbsentModal(1)
+
+      var btnWed = document.createElement('button');
+      btnWed.appendChild(document.createTextNode('We'))
+      btnWed.onclick = () => pickAbsentModal(2)
+
+      var btnThr = document.createElement('button');
+      btnThr.appendChild(document.createTextNode('Th'))
+      btnThr.onclick = () => pickAbsentModal(3)
+
+      var btnFri = document.createElement('button');
+      btnFri.appendChild(document.createTextNode('Fr'))
+      btnFri.onclick = () => pickAbsentModal(4)
+
+      var btnSat = document.createElement('button');
+      btnSat.appendChild(document.createTextNode('Se'))
+      btnSat.onclick = () => pickAbsentModal(5)
+
       // Create button
-      var btn = document.createElement('button');
-      btn.appendChild(document.createTextNode(' AF Generator '));
-      btn.style.marginLeft = '10px'
-      btn.style.marginRight = '10px'
+      var btnGen = document.createElement('button');
+      btnGen.appendChild(document.createTextNode(' AF Generator '))
+      btnGen.style.marginLeft = '10px'
+      btnGen.style.marginRight = '10px'
 
-      se.appendChild(btn);
+      var div = document.createElement('div');
+      div.appendChild(dateMon)
+      div.appendChild(btnMon)
+      div.appendChild(btnTue)
+      div.appendChild(btnWed)
+      div.appendChild(btnThr)
+      div.appendChild(btnFri)
+      div.appendChild(btnSat)
+      div.appendChild(btnGen)
 
-      btn.onclick = async () => {
+      se.appendChild(div)
+
+      btnGen.onclick = async () => {
         var table = $('<table id = "target"> \
           <tr> \
             <th>No</th> \
@@ -265,14 +391,14 @@ jQuery.noConflict();
 
         allRecords.forEach((element, i) => {
           const name = element.Contact_Name.value
-          const checked = false//(selected == 'undefined' || selected == null) ? false : selected.includes(name)
+          const checked = false
           table.append('<tr><td>' + (i + 1) + '</td>'
             + '<td>' + name + '</td>'
             + '<td><input type="checkbox" value = "' + name + '"' + (checked ? ' checked' : '') + '></td></tr>');
         });
 
         Swal.fire({
-          title: 'Select Rows',
+          title: 'AF Generator',
           html: body,
           showCancelButton: true,
           heightAuto: false,
@@ -319,6 +445,7 @@ jQuery.noConflict();
                     text: 'There are duplicated record(s) in same Monday. They will not generated',
                   }).then(() => {
                     if (selected == 0) {
+                      saveConfig()
                       hideIndicator()
                       return
                     }
