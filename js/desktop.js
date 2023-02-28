@@ -360,9 +360,12 @@ jQuery.noConflict();
       var btnGen = document.createElement('button');
       btnGen.appendChild(document.createTextNode(' AF Generator '))
       btnGen.style.marginLeft = '10px'
-      btnGen.style.marginRight = '10px'
 
       var div = document.createElement('div');
+      div.style.display = 'inline'
+      div.style.border = '1px solid #0000FF'
+      div.style.padding = '10px'
+
       div.appendChild(dateMon)
       div.appendChild(btnMon)
       div.appendChild(btnTue)
