@@ -353,7 +353,7 @@ jQuery.noConflict();
       btnFri.onclick = () => pickAbsentModal(4)
 
       var btnSat = document.createElement('button');
-      btnSat.appendChild(document.createTextNode('Se'))
+      btnSat.appendChild(document.createTextNode('Sa'))
       btnSat.onclick = () => pickAbsentModal(5)
 
       // Create button
