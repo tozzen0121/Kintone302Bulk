@@ -46,7 +46,7 @@ jQuery.noConflict();
     c.val = stringVal;
 
     // seems not working....
-    kintone.plugin.app.setConfig(c, ()=> {
+    kintone.plugin.app.setConfig(c, () => {
       console.log("saved configure")
     });
   }
@@ -317,6 +317,10 @@ jQuery.noConflict();
     // Get the element of the Blank space field
     var se = kintone.app.getHeaderMenuSpaceElement();
 
+    var gen = document.getElementById('af_gen_div')
+    if (gen != null)
+      return
+
     // Create plugin elements
     var str = config.val;
     if (typeof str !== 'undefined' && str != '') {
@@ -329,7 +333,7 @@ jQuery.noConflict();
       dateMon.value = configVal.mon_date
       dateMon.addEventListener('input', function (evt) {
         configVal.mon_date = evt.target.value
-    });
+      });
 
       // Create absents buttons
       var btnMon = document.createElement('button');
@@ -365,6 +369,7 @@ jQuery.noConflict();
       div.style.display = 'inline'
       div.style.border = '1px solid #0000FF'
       div.style.padding = '10px'
+      div.id = 'af_gen_div'
 
       div.appendChild(dateMon)
       div.appendChild(btnMon)
