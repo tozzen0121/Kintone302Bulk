@@ -1,6 +1,6 @@
 {
   "manifest_version": 1,
-  "version": "3.0.9",
+  "version": "3.0.17",
   "type": "APP",
   "desktop": {
     "js": [

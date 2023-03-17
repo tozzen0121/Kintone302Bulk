@@ -56,7 +56,7 @@ jQuery.noConflict();
     // Initialize
     if ($('.activity-indicator').length === 0) {
       // Create elements for the spinner and the background of the spinner
-      const spin_div = $('<div class="activity-indicator"></div>');
+      const spin_div = $('<div class="activity-indicator"><div></div></div>');
 
       // Append spinner to the body
       $(document.body).append(spin_div);
